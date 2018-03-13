@@ -21,5 +21,6 @@ repositories {
 dependencies {
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:+"
 }
 
