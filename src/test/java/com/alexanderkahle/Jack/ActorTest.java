@@ -391,6 +391,24 @@ public class ActorTest {
 				beh.messages.get(1), nextMessage);
 	}
 	
+	@Test public void testSystemActorsRemoveLinksToDeadActors() {
+		BehaviourStub beh = new BehaviourStub();
+		ExecutorStub ex = new ExecutorStub();
+		ArrayBlockingQueue<Object> ms = new ArrayBlockingQueue<>(10);
+		HashSet<Actor> links = new HashSet<>();
+		Throwable reason = new NullPointerException("foo");
+
+		Actor subject = new Actor(beh, ex, null, links, ms, null, true);
+		Actor linked = new Actor(null, null, null, null, null, null, false);
+		links.add(linked);
+
+		LinkedActorDied deathMessage = new LinkedActorDied(linked, reason);
+		
+		assertTrue("The subject is linked to the actor", links.contains(linked));
+		subject.kill(deathMessage);		
+		assertFalse("The subject has removed the linked actor", links.contains(linked));
+	}	
+	
 	@Test public void testUnlinking() {
 		HashSet<Actor> l1 = new HashSet<>();
 		ActorWithStubbedKill stub = new ActorWithStubbedKill(null, null, null, l1, null, null, false);

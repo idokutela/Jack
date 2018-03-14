@@ -115,6 +115,7 @@ public class Actor implements Runnable {
 	public void kill(Throwable reason) {
 		if (isSystem && 
 				(reason instanceof LinkedActorDied)) {
+			removeLinkInternal(((LinkedActorDied) reason).actor);
 			send(reason);
 			return;
 		}
