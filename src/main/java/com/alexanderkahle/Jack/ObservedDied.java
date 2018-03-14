@@ -8,4 +8,12 @@ public class ObservedDied {
 		this.reason = reason;
 		this.id = id;
 	}
+	
+	public boolean equals(Object o) {
+		if (!(o instanceof ObservedDied)) {
+			return false;
+		}
+		ObservedDied t = (ObservedDied) o;
+		return t.reason.equals(reason) && t.id == id;
+	}
 }
