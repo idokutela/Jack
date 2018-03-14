@@ -73,7 +73,7 @@ class MainClass {
                         
                         System.out.println("Received a reply of " + 
                             ((HelloMessage) message).greeting);
-                        receiver.kill(null); // kill regularly
+                        receiver.die(null); // kill regularly
                         return this;  // keep going
                     }); 
                 }

@@ -27,7 +27,7 @@ public class Actor implements Runnable {
 		if (messages == null) return;
 		
 		if (!messages.offer(message)) { // I don't care if I'm already dead
-			kill(new BlockedException());
+			die(new BlockedException());
 			return;
 		}
 		
@@ -112,7 +112,7 @@ public class Actor implements Runnable {
 	 * 
 	 * @param reason The reason to kill the actor.
 	 */
-	public void kill(Throwable reason) {
+	public void die(Throwable reason) {
 		if (isSystem && 
 				(reason instanceof LinkedActorDied)) {
 			removeLinkInternal(((LinkedActorDied) reason).actor);
@@ -186,14 +186,14 @@ public class Actor implements Runnable {
 			currentThread = null;
 			// An exception was thrown by the behaviour
 			if (theBehaviour != null) { 
-				kill(t);
+				die(t);
 			}		
 			return;
 		}
 		
 		currentThread = null;
 		if (theBehaviour == null) { // the actor terminated
-			kill(null);
+			die(null);
 			return;
 		}
 
@@ -244,7 +244,7 @@ public class Actor implements Runnable {
 		LinkedActorDied notification = new LinkedActorDied(this, reason);
 		
 		for (Actor a: links) {
-			a.kill(notification);
+			a.die(notification);
 		}		
 	}
 

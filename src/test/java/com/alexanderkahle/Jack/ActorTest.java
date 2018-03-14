@@ -173,7 +173,7 @@ public class ActorTest {
 		Object message = new Object();
 		ms.add(message);
 		
-		ActorWithStubbedKill a = new ActorWithStubbedKill(beh, ex, null, null, ms, null, false);
+		ActorWithStubbedDie a = new ActorWithStubbedDie(beh, ex, null, null, ms, null, false);
 		a.run();
 		assertEquals("The behaviour was called once", beh.callCount, 1);
 		assertEquals("The executor was not called", ex.callCount, 0);
@@ -205,7 +205,7 @@ public class ActorTest {
 		Object message = new Object();
 		ms.add(message);
 		
-		ActorWithStubbedKill a = new ActorWithStubbedKill(beh, ex, null, null, ms, null, false);
+		ActorWithStubbedDie a = new ActorWithStubbedDie(beh, ex, null, null, ms, null, false);
 		a.run();
 		assertEquals("The executor was not called", ex.callCount, 0);
 		assertTrue("The Actor killed itself", a.killed);
@@ -218,7 +218,7 @@ public class ActorTest {
 		ms.add(new Object());
 		Actor a = new Actor(beh, null, /* observers */ null, /* links */ null, 
 				ms, /* generator */ null, /* isSystem */ false); 
-		a.kill(null);
+		a.die(null);
 		a.run();
 		assertEquals(beh.callCount, 0);
 	}
@@ -229,7 +229,7 @@ public class ActorTest {
 		
 		Actor a = new Actor(beh, null, /* observers */ null, /* links */ null, 
 				ms, /* generator */ null, /* isSystem */ false); 
-		a.kill(null);
+		a.die(null);
 		a.send(new Object());
 		assertEquals(beh.callCount, 0);		
 	}
@@ -245,7 +245,7 @@ public class ActorTest {
 		Throwable reason = new NullPointerException("Foo");
 		
 		int observationID = toDie.addObserver(watcher);
-		toDie.kill(reason);
+		toDie.die(reason);
 		
 		assertEquals("The behaviour was called once", beh.messages.size(), 1);
 		assertEquals("The behaviour was called with an ObservedDied message", 
@@ -263,8 +263,8 @@ public class ActorTest {
 		Throwable reason = new NullPointerException("Foo");
 		
 		int observationID = toDie.addObserver(watcher);
-		toDie.kill(reason);
-		toDie.kill(reason);
+		toDie.die(reason);
+		toDie.die(reason);
 		
 		assertEquals("The behaviour was called once", beh.messages.size(), 1);
 		assertEquals("The behaviour was called with an ObservedDied message", 
@@ -286,7 +286,7 @@ public class ActorTest {
 		int observationID1 = toDie.addObserver(watcher);
 		idg.nextID = 1;
 		int observationID2 = toDie.addObserver(watcher);
-		toDie.kill(reason);
+		toDie.die(reason);
 		
 		assertEquals("The behaviour was called twice", beh.messages.size(), 2);
 		assertTrue("The behaviour was called with an ObservedDied message", 
@@ -316,7 +316,7 @@ public class ActorTest {
 		int observationID1 = toDie.addObserver(w1);
 		idg.nextID = 1;
 		int observationID2 = toDie.addObserver(w2);
-		toDie.kill(reason);
+		toDie.die(reason);
 		
 		assertEquals("The first watcher was called once", beh1.messages.size(), 1);
 		assertEquals("The first was called with the correct ObservedDied message", 
@@ -348,7 +348,7 @@ public class ActorTest {
 		idg.nextID = 1;
 		int observationID2 = toDie.addObserver(w2);
 		toDie.removeObserver(observationID2);
-		toDie.kill(reason);
+		toDie.die(reason);
 		
 		assertEquals("The first watcher was called once", beh1.messages.size(), 1);
 		assertEquals("The first was called with the correct ObservedDied message", 
@@ -358,13 +358,13 @@ public class ActorTest {
 	
 	@Test public void testLinksDie() {
 		HashSet<Actor> l1 = new HashSet<>();
-		ActorWithStubbedKill stub = new ActorWithStubbedKill(null, null, null, l1, null, null, false);
+		ActorWithStubbedDie stub = new ActorWithStubbedDie(null, null, null, l1, null, null, false);
 		HashSet<Actor> l2 = new HashSet<>();
 		Actor toDie = new Actor(null, null, null, l2, null, null, false);
 		Throwable reason = new NullPointerException("Foo");
 
 		toDie.link(stub);
-		toDie.kill(reason);
+		toDie.die(reason);
 
 		assertTrue("The linked actor was killed.", stub.killed);
 		assertEquals("The linked actor was killed with a LinkedActorDied", 
@@ -380,7 +380,7 @@ public class ActorTest {
 		Actor a = new Actor(beh, ex, null, null, ms, null, true);
 		Object nextMessage = new Object();
 		
-		a.kill(deathMessage);
+		a.die(deathMessage);
 		a.send(nextMessage);
 		
 		assertEquals("The actor kept going when killed with a LinkedActorDied",
@@ -405,20 +405,20 @@ public class ActorTest {
 		LinkedActorDied deathMessage = new LinkedActorDied(linked, reason);
 		
 		assertTrue("The subject is linked to the actor", links.contains(linked));
-		subject.kill(deathMessage);		
+		subject.die(deathMessage);		
 		assertFalse("The subject has removed the linked actor", links.contains(linked));
 	}	
 	
 	@Test public void testUnlinking() {
 		HashSet<Actor> l1 = new HashSet<>();
-		ActorWithStubbedKill stub = new ActorWithStubbedKill(null, null, null, l1, null, null, false);
+		ActorWithStubbedDie stub = new ActorWithStubbedDie(null, null, null, l1, null, null, false);
 		HashSet<Actor> l2 = new HashSet<>();
 		Actor toDie = new Actor(null, null, null, l2, null, null, false);
 		Throwable reason = new NullPointerException("Foo");
 
 		toDie.link(stub);
 		toDie.unlink(stub);
-		toDie.kill(reason);
+		toDie.die(reason);
 
 		assertFalse("The stub was unaffected by toDie's death.", stub.killed);		
 	}
@@ -451,7 +451,7 @@ public class ActorTest {
 
 		try {
 			Thread.sleep(10);
-			toDie.kill(reason);
+			toDie.die(reason);
 		} catch (InterruptedException e) {
 			fail("The thread was interrupted on sleep");
 		}
@@ -538,18 +538,18 @@ public class ActorTest {
 		}
 	}
 	
-	class ActorWithStubbedKill extends Actor {
+	class ActorWithStubbedDie extends Actor {
 		public boolean killed = false;
 		public Throwable reason = null;
 		
-		ActorWithStubbedKill(Behaviour beh, Executor ex, Map<Integer, Actor> os,  Set<Actor> ls, 
+		ActorWithStubbedDie(Behaviour beh, Executor ex, Map<Integer, Actor> os,  Set<Actor> ls, 
 				BlockingQueue<Object> ms, IDGenerator idg, boolean sys) {
 			super(beh, ex, os, ls, 
 					ms, idg, sys); 
 		}
 		
 		@Override
-		public void kill(Throwable reason) {
+		public void die(Throwable reason) {
 			killed = true;
 			this.reason = reason;
 		}
