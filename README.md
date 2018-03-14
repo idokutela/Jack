@@ -2,7 +2,7 @@
 
 A tiny actor library for Java 7 and up. No dependencies, no complications.
 
-** WARNING: This is still very young. It is likely to change quite a bit!"**
+**WARNING: This is still very young. It is likely to change quite a bit!**
 
 ## Gist
 
@@ -132,7 +132,7 @@ class MainClass {
  * Received second death report
  * Receiver died
  */
-``
+```
 
 ## License
 MIT. See LICENSE.txt .
