@@ -503,6 +503,39 @@ public class ActorTest {
 		assertFalse("The behaviour ran to completion, killing the actor", a.isAlive());
 	}	
 	
+	@Test public void testTakeNextMessageFailsIfCalledOutsideBehaviour() {
+		Behaviour beh = new Behaviour() {
+
+			@Override
+			public Behaviour run(Actor self, Object message) throws Throwable {
+				Thread.sleep(1000);
+				return null;
+			}
+			
+		};
+		Executor ex = new ThreadExecutor();
+		ArrayBlockingQueue<Object> mq = new ArrayBlockingQueue<>(10);
+		Actor a = new Actor(beh, ex, null, null, mq, null, false);
+		mq.add(new Object());
+		boolean exceptionThrown = false;
+		a.send(new Object()); // start the actor
+		
+		try {
+			Thread.sleep(10); // make sure the actor has a chance to start
+			a.takeNextMessage();
+		} catch (RuntimeException e) {
+			assertEquals("The correct exception is thrown when outside",
+					e.getMessage(),
+					"takeNextMessage can only be called inside a behaviour run by the actor.");
+			exceptionThrown = true;
+		} catch (InterruptedException e) {
+			fail("The main thread was interrupted.");
+		}
+		
+		assertTrue("takeNextMessage failed", exceptionThrown);
+		a.die(null);
+	}
+	
 	class BehaviourStub implements Behaviour {
 		public List<Object> messages = new ArrayList<>();
 		public Actor self = null;

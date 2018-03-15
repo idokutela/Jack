@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * An actor-building factory; one can use an instance repeatedly to build actors.
@@ -48,7 +49,7 @@ public class ActorBuilder {
 		
 		BlockingQueue<Object> messages = new ArrayBlockingQueue<>(mailboxSize);
 		reset();
-		return new Actor(theBehaviour, theExecutor, observers, links, messages, idGenerator, isSystem);
+		return new Actor(theBehaviour, theExecutor, observers, links, messages, idGenerator, trapExit);
 	}
 	
 	public ActorBuilder initialBehaviour(Behaviour b) {
@@ -81,8 +82,8 @@ public class ActorBuilder {
 		return this;
 	}
 	
-	public ActorBuilder isSystem(boolean flag) {
-		isSystem = flag;
+	public ActorBuilder trapExit(boolean flag) {
+		trapExit = flag;
 		return this;
 	}
 	
@@ -97,18 +98,11 @@ public class ActorBuilder {
 		links = new HashSet<>();
 		mailboxSize = DEFAULT_MAILBOX_SIZE;
 		idGenerator = defaultIDGenerator;
-		isSystem = false;
+		trapExit = false;
 	}
 	
 	private static Executor makeDefaultExecutor() {
-		return new Executor() {
-
-			@Override
-			public void execute(Runnable command) {
-				(new Thread(command)).start();
-			}
-			
-		};
+		return Executors.newCachedThreadPool();
 	}
 	
 	private static final IDGenerator defaultIDGenerator = new IDGenerator() {
@@ -129,7 +123,7 @@ public class ActorBuilder {
 	private Set<Actor> links;
 	private IDGenerator idGenerator;
 	private int mailboxSize;
-	private boolean isSystem;
+	private boolean trapExit;
 	
 	public static int DEFAULT_MAILBOX_SIZE = 10000000;
 }

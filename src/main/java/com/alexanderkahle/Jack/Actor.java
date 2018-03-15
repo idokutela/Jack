@@ -113,7 +113,7 @@ public class Actor implements Runnable {
 	 * @param reason The reason to kill the actor.
 	 */
 	public void die(Throwable reason) {
-		if (isSystem && 
+		if (trapExit && 
 				(reason instanceof LinkedActorDied)) {
 			removeLinkInternal(((LinkedActorDied) reason).actor);
 			send(reason);
@@ -149,8 +149,13 @@ public class Actor implements Runnable {
 	 * Warning: this blocks if the queue is empty!
 	 * 
 	 * @return the next message in the queue, or null if the actor is dead.
+	 * @throws InterruptedException if interrupted while waiting for a message
+	 * @throws RuntimeException if called outside the actor’s behaviour’s thread.
 	 */
 	public Object takeNextMessage() throws InterruptedException {
+		if (Thread.currentThread() != this.currentThread) 
+			throw new RuntimeException(
+					"takeNextMessage can only be called inside a behaviour run by the actor.");
 		BlockingQueue<Object> messages = this.messages;
 		if (messages == null) return null;
 		return messages.take();
@@ -204,7 +209,7 @@ public class Actor implements Runnable {
 	Actor(Behaviour initialBehaviour, Executor executor,
 			Map<Integer, Actor> observers,
 			Set<Actor> links,
-			BlockingQueue<Object> messages, IDGenerator generator, boolean isSystem) {
+			BlockingQueue<Object> messages, IDGenerator generator, boolean trapExit) {
 		theBehaviour = initialBehaviour;
 		theExecutor = executor;
 		this.observers = observers;
@@ -212,7 +217,7 @@ public class Actor implements Runnable {
 		this.generator = generator;
 		this.links = links;
 		isRunning = false;
-		this.isSystem = isSystem;
+		this.trapExit = trapExit;
 	}
 	
 	private synchronized boolean linkInternal(Actor a) {
@@ -262,5 +267,5 @@ public class Actor implements Runnable {
 	private volatile BlockingQueue<Object> messages;
 	private volatile boolean isRunning = false;
 	private volatile Thread currentThread = null;
-	private volatile boolean isSystem;
+	private volatile boolean trapExit;
 }
