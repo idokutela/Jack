@@ -473,12 +473,14 @@ public class ActorTest {
 		class NeedsTwoMessagesBehaviour implements Behaviour {
 			private Object firstMessage = null;
 			private Object secondMessage = null;
+			public boolean ranToCompletion = false;
 
 			@Override
 			public Behaviour run(Actor self, Object message) throws Throwable {
 				firstMessage = message;
 				
 				secondMessage = self.takeNextMessage();
+				ranToCompletion = true;
 				return null;
 			}
 			
@@ -500,7 +502,7 @@ public class ActorTest {
 				
 		assertEquals("The behaviour obtained the first message", firstMessage, blockingBehaviour.firstMessage);
 		assertEquals("The behaviour obtained the second message", secondMessage, blockingBehaviour.secondMessage);
-		assertFalse("The behaviour ran to completion, killing the actor", a.isAlive());
+		assertTrue("The behaviour ran to completion, killing the actor", blockingBehaviour.ranToCompletion);
 	}	
 	
 	@Test public void testTakeNextMessageFailsIfCalledOutsideBehaviour() {

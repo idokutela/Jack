@@ -160,11 +160,7 @@ public class Actor implements Runnable {
 		if (messages == null) return null;
 		return messages.take();
 	}
-	
-	public boolean isAlive() {
-		return this.theBehaviour != null;
-	}
-	
+		
 	@Override
 	public void run() {
 		Object message;
