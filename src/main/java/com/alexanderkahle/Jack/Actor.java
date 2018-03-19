@@ -251,7 +251,10 @@ public class Actor implements Runnable {
 
 	private void interruptCurrentThread(Thread currentThread) {
 		if (currentThread == null) return;
-		currentThread.interrupt();
+		
+		// Synchronization needed to make sure the system doesn’t reassign the Thread.
+		// See: https://developer.android.com/training/multiple-threads/run-code.html
+		synchronized (this) { currentThread.interrupt(); } 
 	}
 	
 	private final Executor theExecutor;
